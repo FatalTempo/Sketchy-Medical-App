@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<title>Sketchy Medical App</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="styles.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+<form id="form">
+  <input id="input" placeholder="Patient Name"/>
+  <button id="submit" type="button">Submit</button>
+</form>
+<div id="grid-container"></div>
+<div id="infoview">
+  <div class="chart"><canvas id="canvas" height="160" width="730"></canvas></div>
+  <div id="values"></div>
+</div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+var data;fetch("info.json").then(res=>res.json()).then(Data=>{data=Data})
+var flowratedata;
+var flowrate = {
+  backgroundColor: '#ff6384',
+  label: 'Current Flow Rate',
+  borderColor: '#ff6384',
+  pointStyle: false,
+  borderWidth: 1,
+  color: '#ffffff',
+  fill: true,
+  data: flowratedata
+}
+const options_ = {
+  responsive: false,
+  plugins: {
+    customCanvasBackgroundColor: {color:'#404040'},
+    legend: { display: false },
+    title: { display: true, text: 'Current Flow Rate', color: '#FFFFFF' }
+  },
+  scales: {
+    y:{ticks:{color:'#ffffff'},grid:{color:'#ffffff'}},
+    x:{ticks:{color:'#ffffff'},grid:{color:'#ffffff'}},
+  }
+}
+const plugin_ = {
+  id: 'customCanvasBackgroundColor',
+  beforeDraw: (chart, args, options) => {
+    const {ctx} = chart
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-over'
+    ctx.fillStyle = options.color || '#00000000'
+    ctx.fillRect(0, 0, chart.width, chart.height)
+    ctx.restore()
+  }
+}
+const data_ = {
+  labels: ['0', '1', '2', '3', '4', '5'],
+  datasets: [flowrate]
+}
+var IVVolume = {
+  backgroundColor: '#ff6384',
+  borderColor: '#ff6384',
+  label: 'IV Volume',
+  pointStyle: false,
+  borderWidth: 1,
+  color: '#ffffff',
+  fill: true,
+  data: [8, 10, 2, 1, 15, 5],
+}
+const DataArray = [flowrate,IVVolume]
+var pos = 0
+const actions_ = [
+  {
+    name: 'Rotate',
+    handler(chart) {
+      chart.data.datasets.pop()
+      pos++
+      if (pos==DataArray.length+1) {pos=0}
+      chart.data.datasets.push(DataArray[pos])
+      chart.update()
+    }
+  }
+]
+var myChart = new Chart( document.getElementById('canvas') , { type: 'line', data: data_, options: options_, plugins: [plugin_], actions: actions_});
+function GEBI(e){return document.getElementById(e)}
+function does(){
+  event.preventDefault()
+  let input = GEBI('input').value
+  if(!input){return} // guard clause: if input is empty string return
+  if(!data[input.toLowerCase()]){alert('Error Code 1: Inputted Patient Not In Database (Not Valid)');return}
+  GEBI('input').value = ''
+  let divtitle = document.createElement('div')
+  divtitle.className = 'title'
+  divtitle.textContent = input
+  input = data[input.toLowerCase()]
+  let fragment = document.createDocumentFragment()
+  let frame = document.createElement('div')
+  frame.onmouseover = () =>{GEBI('infoview').style.display = 'block'
+    GEBI('values').innerHTML=`
+      Name: ${input.name}<br>
+      Gender: ${input.gender}<br>
+      Weight: ${input.weight}<br>
+      Height: ${input.height}<br>
+      BMI: ${(input.weight/(input.height/100)**2).toFixed(2)}`
+    flowrate.data = input.flowrate
+    myChart.update()
+  }
+  frame.onmouseleave = () =>{if(frame.classList.contains('is-active')){return}GEBI('infoview').style.display = 'none'}
+  frame.onclick = () =>{frame.classList.toggle('is-active')}
+  frame.setAttribute('id','frame')
+  let divtags = document.createElement('div')
+  divtags.className = 'tags'
+  let img = document.createElement('img')
+  img.src=input.img
+  fragment.appendChild(frame)
+  frame.appendChild(img)
+  frame.appendChild(divtitle)
+  frame.appendChild(divtags)
+  GEBI('grid-container').appendChild(fragment)
+}
+
+GEBI('submit').addEventListener("click",does);
+GEBI('input').addEventListener('keydown',event=>{if(event.key==='Enter'){does()}});
+</script>
+
+</html>

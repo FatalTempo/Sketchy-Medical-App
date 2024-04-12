@@ -1,0 +1,25 @@
+{
+    "johnny sins": {
+        "name": "Johnny Sins",
+        "gender": "Male",
+        "weight": 80,
+        "height": 177,
+        "img": "https://i.pinimg.com/736x/74/7c/4f/747c4f29e2a113589636b1a8b10f9521.jpg",
+        "flowrate": [5, 9, 2, 15, 20, 12]
+    },
+    "deuce bigalow": {
+        "name": "Deuce Bigalow 'Male' Gigolo",
+        "gender": "Male",
+        "weight": 100,
+        "height": 150,
+        "img": "https://i.pinimg.com/736x/0c/ab/e8/0cabe8036fe675e5bbfe1145c8f51e65.jpg",
+        "flowrate": [12, 19, 3, 5, 2, 3]
+    },
+    "fubuki": {
+        "name": "Shirakami Fubuki",
+        "gender": "Female",
+        "weight": 69,
+        "height": 420,
+        "img": "https://preview.redd.it/fubuki-shirakami-hololive-v0-wdgyc61udxwb1.jpg?auto=webp&s=3f5a444187e642a90996f66906cd04d41bba9dc9"
+    }
+}
