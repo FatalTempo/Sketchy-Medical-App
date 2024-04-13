@@ -1,19 +1,19 @@
 {
-    "johnny sins": {
-        "name": "Johnny Sins",
+    "dave mchappy": {
+        "name": "Dave McHappy",
         "gender": "Male",
         "weight": 80,
         "height": 177,
-        "img": "https://i.pinimg.com/736x/74/7c/4f/747c4f29e2a113589636b1a8b10f9521.jpg",
+        "img": "https://media.tenor.com/F8rXeqo99mcAAAAM/shanon-sharpie-suit-meme-jay-enhypen.gif",
         "flowrate": [5, 9, 2, 15, 20, 12],
         "ivvolume": [22,19,15,11,7,3]
     },
     "deuce bigalow": {
-        "name": "Deuce Bigalow 'Male' Gigolo",
+        "name": "Deuce Bigalow",
         "gender": "Male",
         "weight": 100,
-        "height": 150,
-        "img": "https://i.pinimg.com/736x/0c/ab/e8/0cabe8036fe675e5bbfe1145c8f51e65.jpg",
+        "height": 176,
+        "img": "https://i0.wp.com/midwestfilmjournal.com/wp-content/uploads/2020/07/Screen-Shot-2020-08-08-at-10.42.16-AM.png?fit=1515%2C969&ssl=1",
         "flowrate": [12, 19, 3, 5, 2, 3],
         "ivvolume": [25,22,20,18,14,7]
     }
