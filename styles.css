@@ -1,4 +1,4 @@
-:root {--offbrandwhite: #d9d9d9;}
+:root { --offbrandwhite: #d9d9d9; }
 body {
     margin: 0px;
     background-color: #0d0d0d;
@@ -17,7 +17,7 @@ body {
   border-radius: 10px;
   justify-items: center;
 }
-.caption {color:var(--offbrandwhite);}
+.caption { color:var(--offbrandwhite); }
 .title {
     color: var(--offbrandwhite);
     font-weight: bold;
@@ -63,13 +63,31 @@ form {
     color: var(--offbrandwhite);
     border: 0px;
 }
-button {
+#submit {
     background-color: #ed2553;
     color: var(--offbrandwhite);
     font-weight: bold;
     border: 1px solid #ed2553;
     cursor: pointer;
     padding: 10px;
+}
+#rotate, #live {
+  color: #ff6384;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #303030;
+  margin-left: 20px;
+}
+@keyframes live_is_active {
+	0% {box-shadow: 0 0 0 0 #ff0037b3}
+	70% {box-shadow: 0 0 0 10px #ff000000}
+	100% {box-shadow: 0 0 0 0 #ff000000}
+}
+#live.is-active {
+  animation: live_is_active 4s infinite;
 }
 @media (pointer:coarse) {
     .grid-container {
@@ -97,9 +115,5 @@ button {
     color: white;
     font-size: x-large;
 }
-canvas {
-    background-color: white;
-}
-.chart {
-    float: left;
-}
+canvas { background-color: white; }
+.chart { float: left; }
