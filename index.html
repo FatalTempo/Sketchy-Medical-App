@@ -15,7 +15,13 @@
 </form>
 <div id="grid-container"></div>
 <div id="infoview">
-  <div class="chart"><canvas id="canvas" height="160" width="730"></canvas></div>
+  <div class="chart">
+    <canvas id="canvas" height="160" width="680"></canvas>
+    <button id="rotate" type="button">Rotate</button>
+    <button id="live" type="button">View Live 
+      <span style="font-weight:normal;">(4s)</span>
+    </button>
+  </div>
   <div id="values"></div>
 </div>
 </body>
@@ -24,7 +30,6 @@
 
 <script>
 var data;fetch("info.json").then(res=>res.json()).then(Data=>{data=Data})
-var flowratedata;
 var flowrate = {
   backgroundColor: '#ff6384',
   label: 'Current Flow Rate',
@@ -33,9 +38,9 @@ var flowrate = {
   borderWidth: 1,
   color: '#ffffff',
   fill: true,
-  data: flowratedata
+  data: []
 }
-const options_ = {
+const options = {
   responsive: false,
   plugins: {
     customCanvasBackgroundColor: {color:'#404040'},
@@ -47,7 +52,7 @@ const options_ = {
     x:{ticks:{color:'#ffffff'},grid:{color:'#ffffff'}},
   }
 }
-const plugin_ = {
+const plugin = {
   id: 'customCanvasBackgroundColor',
   beforeDraw: (chart, args, options) => {
     const {ctx} = chart
@@ -58,10 +63,6 @@ const plugin_ = {
     ctx.restore()
   }
 }
-const data_ = {
-  labels: ['0', '1', '2', '3', '4', '5'],
-  datasets: [flowrate]
-}
 var IVVolume = {
   backgroundColor: '#ff6384',
   borderColor: '#ff6384',
@@ -70,48 +71,52 @@ var IVVolume = {
   borderWidth: 1,
   color: '#ffffff',
   fill: true,
-  data: [8, 10, 2, 1, 15, 5],
+  data: []
 }
-const DataArray = [flowrate,IVVolume]
+const data_ = {
+  labels: ['0', '1', '2', '3', '4', '5'],
+  datasets: [flowrate]
+}
+
 var pos = 0
-const actions_ = [
-  {
-    name: 'Rotate',
-    handler(chart) {
-      chart.data.datasets.pop()
-      pos++
-      if (pos==DataArray.length+1) {pos=0}
-      chart.data.datasets.push(DataArray[pos])
-      chart.update()
-    }
-  }
-]
-var myChart = new Chart( document.getElementById('canvas') , { type: 'line', data: data_, options: options_, plugins: [plugin_], actions: actions_});
+const DataArray = [flowrate,IVVolume]
+var myChart = new Chart( document.getElementById('canvas') , { type: 'line', data: data_, options: options, plugins: [plugin] });
 function GEBI(e){return document.getElementById(e)}
 function does(){
   event.preventDefault()
   let input = GEBI('input').value
   if(!input){return} // guard clause: if input is empty string return
-  if(!data[input.toLowerCase()]){alert('Error Code 1: Inputted Patient Not In Database (Not Valid)');return}
+  input = data[input.toLowerCase()]
+  if(!input){alert('Error Code 1: Inputted Patient Not In Database (Not Valid)');return}
   GEBI('input').value = ''
   let divtitle = document.createElement('div')
   divtitle.className = 'title'
-  divtitle.textContent = input
-  input = data[input.toLowerCase()]
+  divtitle.textContent = input.name
   let fragment = document.createDocumentFragment()
   let frame = document.createElement('div')
-  frame.onmouseover = () =>{GEBI('infoview').style.display = 'block'
+  frame.onmouseover = () =>{
+    GEBI('infoview').style.display = 'block'
     GEBI('values').innerHTML=`
       Name: ${input.name}<br>
       Gender: ${input.gender}<br>
-      Weight: ${input.weight}<br>
-      Height: ${input.height}<br>
+      <span onmouseover="this.textContent='Weight: '+Number(this.textContent.replace(/[^0-9]+/g,''))*2.205+' lbs'" onmouseleave="this.textContent='Weight: ${input.weight} kg'">Weight: ${input.weight} kg</span><br>
+      <span onmouseover="
+        let realFeet=${input.height}/2.54/12;
+        let feet=Math.floor(realFeet);
+        this.textContent='Height: '+feet+'&prime;'+Math.round((realFeet-feet)*12)+'&Prime;'
+      "
+      onmouseleave="this.textContent='Height: ${input.height} cm'">Height: ${input.height} cm</span><br>
       BMI: ${(input.weight/(input.height/100)**2).toFixed(2)}`
-    flowrate.data = input.flowrate
+    pos ? (IVVolume.data=input.ivvolume,myChart.options.plugins.title.text='IV Volume') : (flowrate.data=input.flowrate,myChart.options.plugins.title.text='Current Flow Rate') // pos = 1 (IV Volume), pos = 2 (Flowrate)
     myChart.update()
   }
-  frame.onmouseleave = () =>{if(frame.classList.contains('is-active')){return}GEBI('infoview').style.display = 'none'}
-  frame.onclick = () =>{frame.classList.toggle('is-active')}
+  frame.onmouseleave = ()=>{if(!frame.classList.contains('is-active')){GEBI('infoview').style.display='none'}} // if its not active, hide it
+  frame.onclick = ()=>{
+    let is_active = document.getElementsByClassName('is-active')
+    if (is_active.length==1){
+      for (let i=0;i<is_active.length;i++){ is_active[i].classList.toggle('is-active') } // removes preexisting actives
+    } else {frame.classList.toggle('is-active')}
+  }
   frame.setAttribute('id','frame')
   let divtags = document.createElement('div')
   divtags.className = 'tags'
@@ -126,6 +131,27 @@ function does(){
 
 GEBI('submit').addEventListener("click",does);
 GEBI('input').addEventListener('keydown',event=>{if(event.key==='Enter'){does()}});
+GEBI('rotate').addEventListener("click",()=>{
+  myChart.data.datasets.pop()
+  pos++
+  if (pos==DataArray.length+1) {pos=0}
+  myChart.data.datasets.push(DataArray[pos])
+  pos ? myChart.options.plugins.title.text='IV Volume' : myChart.options.plugins.title.text='Current Flow Rate'
+  myChart.update()
+})
+let livebutton = GEBI('live')
+function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms))}
+livebutton.addEventListener("click",async()=>{
+  livebutton.classList.toggle('is-active')
+  while (livebutton.classList.contains('is-active')){
+    myChart.data.labels.push(myChart.data.labels.length+1)
+    let rand = Math.floor(Math.random() * 16) + 5 // 20 is max, 5 is min
+    pos ? IVVolume.data.push(rand) : flowrate.data.push(rand)
+    console.log(flowrate.data)
+    myChart.update()
+    await sleep(4000)
+  }
+})
 </script>
 
 </html>
